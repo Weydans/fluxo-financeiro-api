@@ -1,0 +1,77 @@
+version: "3"
+
+# Create networks
+networks:
+  app-lan:
+    driver: bridge
+  db-lan: 
+    driver: bridge
+
+# Create servers
+services:
+
+  # Create webserver
+  webserver:
+    image: nginx:1.24
+    container_name: webserver
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/defaul.conf:ro
+    networks:
+      - app-lan
+    depends_on:
+      - app
+
+  # Create application server
+  app:
+    build:
+      args: 
+        user: weydans
+        uid: 1000
+      context: ./docker/phpfpm
+      dockerfile: Dockerfile
+    container_name: app
+    image: php-fpm
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    networks:
+      - app-lan
+      - db-lan
+    depends_on:
+      - db
+
+  # Create database server
+  db:
+    image: mysql:5.7.42
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306
+    volumes:
+      - ./.data:/var/lib/mysql
+    networks:
+      - db-lan
+
+  # Swagger doc server
+  doc:
+    image: swaggerapi/swagger-ui
+    container_name: doc
+    restart: unless-stopped
+    environment: 
+      SWAGGER_JSON: /api/v0/swagger.json
+    ports:
+      - 8001:8080
+    volumes: 
+      - ./docker/swagger/api/v0/swagger.json:/api/v0/swagger.json
+
