@@ -1,0 +1,80 @@
+{
+	"openapi": "3.0.3",
+	"info": {
+		"title": "API do sitema de fluxo financeiro",
+		"description": "Documentação dos endpoints da API do sistema de fluxo financeiro. Por aqui é possível se autenticar e realizar ações em todo o sistema",
+		"version": "0.1.0",
+		"contact": {
+			"name": "Weydans Barros",
+			"email": "weydans@hotmail.com"
+		},
+		"license": "GPLv3",
+		"url": "https://www.gnu.org/licenses/gpl-3.0.pt-br.html"
+	},
+	"servers": [
+		{
+			"url": "http://localhost:8000/api/v0/",
+			"description": "API de desenvolvimento"
+		}
+	],
+	"paths": {
+		"/login": {
+			"post": {
+				"summary": "Permite realizar login na aplicação",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string",
+										"format": password
+									}
+								}	
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"data": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"message": {
+											"type": "string"
+										},
+										"errors": {
+											"type": "object"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
