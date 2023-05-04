@@ -24,7 +24,6 @@ class LoginController extends Controller
 
 		return LoginResource::make([
 			'user'           => $user,
-			'accessToken'    => $token->accessToken,
 			'plainTextToken' => $token->plainTextToken,
 		]);
 	}

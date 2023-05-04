@@ -11,17 +11,17 @@ use \App\Models\User;
 
 class LoginTest extends TestCase
 {
-	use RefreshDatabase;
+	use RefreshDatabase, WithFaker;
 
     public function test_login_should_return_access_token_on_success(): void
 	{
 		$loginData = [
-			'email' => 'user@email.com',
-			'password' => '123456',
+			'email' => $this->faker->unique()->safeEmail,
+			'password' => $this->faker->password(6, 191),
 		];
 
-		$user = User::factory()->create([
-			'email' => 'user@email.com',
+		User::factory()->create([
+			'email' => $loginData['email'],
 			'password' => bcrypt($loginData['password']),
 		]);
 
@@ -30,8 +30,6 @@ class LoginTest extends TestCase
 		$response->assertStatus(200);
 
 		$response->assertJson(function( AssertableJson $json ) {
-			$json->has('data');
-			$json->has('data.accessToken');
 			$json->has('data.plainTextToken');
 			$json->has('data.user');
 		});
@@ -40,11 +38,11 @@ class LoginTest extends TestCase
     public function test_login_should_return_error_message_when_email_not_found(): void
 	{
 		$loginData = [
-			'email' => 'user@email.com',
-			'password' => '123456',
+			'email' => $this->faker->unique()->safeEmail,
+			'password' => $this->faker->password(6, 191),
 		];
 
-		$user = User::factory()->create([
+		User::factory()->create([
 			'email' => 'foo@bar.com',
 			'password' => bcrypt($loginData['password']),
 		]);
@@ -61,12 +59,12 @@ class LoginTest extends TestCase
     public function test_login_should_return_error_message_when_password_do_not_match(): void
 	{
 		$loginData = [
-			'email' => 'user@email.com',
+			'email' => $this->faker->unique()->safeEmail,
 			'password' => '246810',
 		];
 
-		$user = User::factory()->create([
-			'email' => 'user@email.com',
+		User::factory()->create([
+			'email' => $loginData['email'],
 			'password' => bcrypt('123456'),
 		]);
 
@@ -82,7 +80,7 @@ class LoginTest extends TestCase
     public function test_login_should_return_error_when_password_is_empty(): void
 	{
 		$loginData = [
-			'email' => 'user@email.com',
+			'email' => $this->faker->unique()->safeEmail,
 			'password' => '',
 		];
 
@@ -94,7 +92,7 @@ class LoginTest extends TestCase
     public function test_login_should_return_error_when_password_is_smaller_than_6_characters(): void
 	{
 		$loginData = [
-			'email' => 'user@email.com',
+			'email' => $this->faker->unique()->safeEmail,
 			'password' => '12345',
 		];
 
@@ -106,7 +104,7 @@ class LoginTest extends TestCase
     public function test_login_should_return_error_when_password_is_bigger_than_191_characters(): void
 	{
 		$loginData = [
-			'email'    => 'user@email.com',
+			'email' => $this->faker->unique()->safeEmail,
 			'password' => str_repeat('a', 192),
 		];
 
@@ -119,7 +117,7 @@ class LoginTest extends TestCase
 	{
 		$loginData = [
 			'email'    => '',
-			'password' => '123456',
+			'password' => $this->faker->password(6, 191),
 		];
 
 		$response = $this->postJson(route('login'), $loginData);
@@ -131,7 +129,7 @@ class LoginTest extends TestCase
 	{
 		$loginData = [
 			'email'    => 'maria1234',
-			'password' => '123456',
+			'password' => $this->faker->password(6, 191),
 		];
 
 		$response = $this->postJson(route('login'), $loginData);

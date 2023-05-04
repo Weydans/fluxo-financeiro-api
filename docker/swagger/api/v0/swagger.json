@@ -20,11 +20,15 @@
 	"paths": {
 		"/login": {
 			"post": {
-				"summary": "Permite realizar login na aplicação",
+				"summary": "Realiza login na aplicação",
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
+								"required": [
+									"email", 
+									"password"
+								],
 								"type": "object",
 								"properties": {
 									"email": {
@@ -32,7 +36,7 @@
 									},
 									"password": {
 										"type": "string",
-										"format": password
+										"format": "password"
 									}
 								}	
 							}
@@ -48,7 +52,16 @@
 									"type": "object",
 									"properties": {
 										"data": {
-											"type": "string"
+											"type": "object",
+											"properties": {
+												"user": {
+													"$ref": "#components/schemas/user"
+												},
+												"plainTextToken": {
+													"type": "string",
+													"example": "1|NQ4n8orGgQT8batMpFkRfyquJM1mcyZTfcx71234"
+												}
+											}
 										}
 									}
 								}
@@ -60,20 +73,153 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "object",
-									"properties": {
-										"message": {
-											"type": "string"
-										},
-										"errors": {
-											"type": "object"
-										}
-									}
+									"$ref": "#components/schemas/error_validation_response"
 								}
 							}
 						}
 					}
 				}
+			}
+		},
+		"/users": {
+			"post": {
+				"summary": "Realiza o cadastro de usuário na aplicação",
+				"security": [
+					{
+						"auth": []
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"required": [
+									"name",
+									"email",
+									"password"
+								],
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string"
+									},
+									"email": {
+										"type": "string"
+									},
+									"password": {
+										"type": "string",
+										"format": "password"
+									}
+								}	
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Success",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"data": {
+											"type": "object",
+											"properties": { 
+												"user": {
+													"$ref": "#components/schemas/user"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#components/schemas/unauthorized"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Unprocessable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#components/schemas/error_validation_response"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"user": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer",
+						"example": 143
+					},
+					"name": {
+						"type": "string",
+						"example": "Airton Sena"
+					},
+					"email": {
+						"type": "string",
+						"example": "airton@email.com"
+					},
+					"created_at": {
+						"type": "string",
+						"example": "2023-05-02T21:18:24.000000Z"
+					},
+					"updated_at": {
+						"type": "string",
+						"example": "2023-05-02T21:18:24.000000Z"
+					}
+				}
+			},
+			"error_validation_response": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"errors": {
+						"type": "object",
+						"properties": {
+							"field_1": {
+								"type": "array",
+								"example": ["Mensagem um", "Mensagem dois"]
+							},"field_2": {
+								"type": "array",
+								"example": ["Mensagem um", "Mensagem dois"]
+							}
+						}
+					}
+				}
+			},
+			"unauthorized": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		"securitySchemes": {
+			"auth": {
+				"type": "http",
+				"scheme": "bearer"
 			}
 		}
 	}
